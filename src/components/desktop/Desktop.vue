@@ -1,42 +1,16 @@
 <template>
-  <div
-    ref="desktop"
-    class="desktop"
-    v-on:click.left="resetDesktopContextMenu"
-    v-on:click.right="desktopContextMenu"
-  >
+  <div ref="desktop" class="desktop" v-on:click.left="resetDesktopContextMenu" v-on:click.right="desktopContextMenu">
     <div class="programs">
-      <Window
-        v-bind:key="index"
-        v-for="(program, index) in programsOpen"
-        :fileName="program[0]"
-        :fileIcon="program[1]"
-        :fileType="program[2]"
-        :files="program[4]"
-        :minimize="program[3]"
-        :programsOpen="programsOpen"
-        @openProgram="openProgram"
-        @closeProgram="closeProgram"
-        @minimizeWindow="minimizeWindow"
-      >
+      <Window v-bind:key="index" v-for="(program, index) in programsOpen" :fileName="program[0]" :fileIcon="program[1]"
+        :fileType="program[2]" :files="program[4]" :minimize="program[3]" :programsOpen="programsOpen"
+        @openProgram="openProgram" @closeProgram="closeProgram" @minimizeWindow="minimizeWindow">
         <component :is="program[1]"></component>
       </Window>
-      <Program
-        v-for="(program, index) in programs"
-        v-bind:key="index"
-        :fileName="program[0]"
-        :fileIcon="program[1]"
-        :fileType="program[2]"
-        :files="program[4]"
-        @openProgram="openProgram"
-      />
+      <Program v-for="(program, index) in programs" v-bind:key="index" :fileName="program[0]" :fileIcon="program[1]"
+        :fileType="program[2]" :files="program[4]" @openProgram="openProgram" />
     </div>
-    <DesktopContextMenu
-      v-if="this.desktopContextMenuActive"
-      :position="this.desktopContextMenuPosition"
-      @fullscreenMode="$emit('fullscreenMode')"
-      @crtMode="$emit('crtMode')"
-    />
+    <DesktopContextMenu v-if="this.desktopContextMenuActive" :position="this.desktopContextMenuPosition"
+      @fullscreenMode="$emit('fullscreenMode')" @crtMode="$emit('crtMode')" />
   </div>
 </template>
 <script>
@@ -103,6 +77,9 @@ export default {
   padding: 0;
   position: relative;
   background-color: #008080;
+  background-image: url('/WallpaperDog-5479332.jpg');
+  background-size: contain;
+
   .programs {
     height: 100%;
     display: flex;

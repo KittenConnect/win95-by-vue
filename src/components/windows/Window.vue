@@ -1,29 +1,14 @@
 <template>
-  <div
-    style="z-index: 2"
-    @mousedown="windowMouseDown($event)"
-    v-on:click.right.stop="preventDefault($event)"
-    v-if="minimize"
-    class="window"
-    :class="{ maximize: maximizeWindow }"
-  >
-    <div
-      class="menu-bar"
-      @dblclick.stop="doubleClick($event)"
-      @mousedown="mouseDown($event)"
-      @mouseup="mouseUp()"
-      @mousemove="mouseMove($event)"
-      @mouseleave="mouseLeave($event)"
-    >
+  <div style="height: { height }; width: { width }; z-index: 2" @mousedown="windowMouseDown($event)"
+    v-on:click.right.stop="preventDefault($event)" v-if="minimize" class="window" :class="{ maximize: maximizeWindow }">
+    <div class="menu-bar" @dblclick.stop="doubleClick($event)" @mousedown="mouseDown($event)" @mouseup="mouseUp()"
+      @mousemove="mouseMove($event)" @mouseleave="mouseLeave($event)">
       <div class="title">
-        <span
-          class="icon"
-          :style="{
-            backgroundImage:
-              'url(' + require('@/assets/icon/' + fileIcon + '.png') + ')',
-          }"
-        ></span
-        ><span>{{ fileName }}</span>
+        <span class="icon" :style="{
+          backgroundImage:
+            'url(' + require('@/assets/icon/' + fileIcon + '.png') + ')',
+        }
+          "></span><span>{{ truncate(fileName, 40) }}</span>
       </div>
       <div class="actions">
         <div v-on:click="minimizeWindow()" @mouseleave="releaseWindow()">
@@ -38,15 +23,8 @@
       </div>
     </div>
     <div class="loaded-program">
-      <component
-        :is="loadedProgram"
-        :fileName="fileName"
-        :fileIcon="fileIcon"
-        :fileType="fileType"
-        :programsOpen="programsOpen"
-        @openProgram="openProgram"
-        @closeProgram="closeProgram"
-      ></component>
+      <component :is="loadedProgram" :fileName="fileName" :fileIcon="fileIcon" :fileType="fileType"
+        :programsOpen="programsOpen" @openProgram="openProgram" @closeProgram="closeProgram"></component>
     </div>
   </div>
 </template>
@@ -57,6 +35,13 @@ import Internet from "./Internet.vue";
 import AOL from "./AOL.vue";
 import Dialog from "./Dialog.vue";
 import Folder from "./Folder.vue";
+import S3Folder from "./S3Folder.vue";
+import FileDL from "./FileDL.vue";
+
+// import PinBall from "./games/PinBall.vue";
+
+import { truncate } from "../../data/S3Directory.vue";
+
 export default {
   name: "Window",
   data() {
@@ -73,15 +58,21 @@ export default {
   components: {
     Notepad,
     Folder,
+    S3Folder,
     Paint,
     Internet,
     AOL,
     Dialog,
+    FileDL,
+    /* Games */
+    // PinBall,
   },
   props: {
     fileName: String,
     fileIcon: String,
     fileType: String,
+    height: String,
+    width: String,
     minimize: Boolean,
     programsOpen: Array,
   },
@@ -89,6 +80,7 @@ export default {
     this.zCycle();
   },
   methods: {
+    truncate,
     zCycle(zIndex) {
       var programs = document.querySelectorAll(".window");
       zIndex = zIndex || 2;
@@ -164,13 +156,13 @@ export default {
 </script>
 <style lang="scss" scoped>
 .window {
-  height: 60%;
-  width: 60%;
   position: absolute;
   resize: both;
   overflow: auto;
   top: 10%;
   left: 10%;
+  height: 55%;
+  width: 55%;
   min-height: 150px;
   min-width: 310px;
   padding: 2px;
@@ -181,10 +173,10 @@ export default {
   background-color: rgba(191, 193, 192, 1);
   border-style: solid;
   border-width: 1px;
-  border-color: rgb(254, 254, 254) rgb(10, 10, 10) rgb(10, 10, 10)
-    rgb(254, 254, 254);
+  border-color: rgb(254, 254, 254) rgb(10, 10, 10) rgb(10, 10, 10) rgb(254, 254, 254);
   box-shadow: rgb(223 223 223) 1px 1px 0px 0px inset,
     rgb(132 133 132) 0px 0px 0px 1px inset;
+
   &.maximize {
     left: 0 !important;
     right: 0 !important;
@@ -194,6 +186,7 @@ export default {
     width: auto !important;
     height: auto !important;
   }
+
   .menu-bar {
     height: 18px;
     display: flex;
@@ -203,6 +196,7 @@ export default {
     background-color: $highlightV95;
     padding: 0px 3px;
     user-select: none;
+
     .title {
       padding: 2px 0px;
       display: flex;
@@ -210,6 +204,7 @@ export default {
       align-items: center;
       color: white;
       pointer-events: none;
+
       .icon {
         width: 16px;
         height: 16px;
@@ -219,11 +214,13 @@ export default {
         display: block;
       }
     }
+
     .actions {
       display: flex;
       flex-direction: row;
       align-items: center;
       justify-content: flex-end;
+
       div {
         width: 16px;
         height: 14px;
@@ -233,24 +230,25 @@ export default {
         background-color: rgba(191, 193, 192, 1);
         border-style: solid;
         border-width: 1px;
-        border-color: rgb(254, 254, 254) rgb(10, 10, 10) rgb(10, 10, 10)
-          rgb(254, 254, 254);
+        border-color: rgb(254, 254, 254) rgb(10, 10, 10) rgb(10, 10, 10) rgb(254, 254, 254);
         box-shadow: rgb(223 223 223) 1px 1px 0px 0px inset;
+
         &:active {
           border-style: solid;
           border-width: 1px;
-          border-color: rgb(10, 10, 10) rgb(254, 254, 254) rgb(254, 254, 254)
-            rgb(10, 10, 10);
+          border-color: rgb(10, 10, 10) rgb(254, 254, 254) rgb(254, 254, 254) rgb(10, 10, 10);
           box-shadow: rgb(223 223 223) 1px 1px 0px 0px inset;
         }
       }
     }
   }
+
   .loaded-program {
     overflow: auto;
     height: 100%;
     width: 100%;
-    > div {
+
+    >div {
       height: 100%;
       width: 100%;
     }

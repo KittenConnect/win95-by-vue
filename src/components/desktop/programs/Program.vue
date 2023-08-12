@@ -1,16 +1,14 @@
 <template>
   <div class="program" @dblclick.stop="openProgram">
-    <span
-      class="icon"
-      :style="{
-        backgroundImage:
-          'url(' + require('@/assets/icon/' + fileIcon + '.png') + ')',
-      }"
-    ></span>
-    <span class="title">{{ fileName }}</span>
+    <span class="icon" :style="{
+      backgroundImage:
+        'url(' + require('@/assets/icon/' + fileIcon + '.png') + ')',
+    }"></span>
+    <span class="title">{{ truncate(fileName, 30) }}</span>
   </div>
 </template>
 <script>
+import { truncate } from "../../../data/S3Directory.vue";
 export default {
   name: "Program",
   props: {
@@ -21,6 +19,7 @@ export default {
     open: Boolean,
   },
   methods: {
+    truncate,
     openProgram() {
       this.$emit("openProgram", this.fileName, this.fileIcon, this.fileType, this.files);
     },
@@ -39,10 +38,12 @@ export default {
   padding: 2px;
   color: white;
   user-select: none;
+
   .title {
     border: 1px solid transparent;
     cursor: default;
   }
+
   .icon {
     width: 32px;
     height: 32px;
@@ -51,11 +52,13 @@ export default {
     position: relative;
     display: block;
   }
+
   &:active {
     span.title {
       background-color: $highlightV95;
       border: 1px dotted #939393;
     }
+
     .icon {
       filter: opacity(0.5) drop-shadow(0 0 0 $highlightV95);
     }

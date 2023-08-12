@@ -4,29 +4,50 @@
       <div class="link">
         File
         <div class="submenu">
-          <div class="link">Save as...</div>
+          <div class="link" v-on:click="download(realPath)">Save Locally ...</div>
           <div class="link" v-on:click="closeProgram">Exit</div>
         </div>
       </div>
-      <a
-        href="https://github.com/johnuberbacher/vue-95"
-        target="_blank"
-        class="link"
-      >
+      <a href="https://github.com/johnuberbacher/vue-95" target="_blank" class="link">
         About
       </a>
       <div class="link">Help</div>
     </div>
-    <textarea autofocus></textarea>
+    <textarea v-model="fileContent" autofocus></textarea>
   </div>
 </template>
 <script>
 export default {
   name: "Notepad",
+  data() {
+    return {
+      fileContent: '',
+      realPath: [],
+    };
+  },
   props: {
     fileName: String,
+    programsOpen: Array,
+  },
+  created() {
+    this.loadContent(this.programsOpen, this.fileName)
   },
   methods: {
+    loadContent(searchDirectory, fileSearch) {
+      let filteredResult = searchDirectory
+        .filter((row) => row[0] === fileSearch)
+        .map((row) => row);
+      this.realPath = filteredResult[0][4]
+      console.log('NotePad URL :' + this.realPath);
+      if (this.realPath)
+        fetch(this.realPath)
+          .then(response => response.text())
+          .then(text => this.fileContent = text)
+          .catch(err => console.log('Error loading file text:', err));
+    },
+    download(fileName) {
+      window.location.href = fileName
+    },
     closeProgram(fileName) {
       this.$emit("closeProgram", fileName);
     },
@@ -40,6 +61,7 @@ export default {
   overflow: auto;
   display: flex;
   flex-direction: column;
+
   .file-bar {
     background-color: rgba(191, 193, 192, 1);
     padding: 2px 0px 0px 0px;
@@ -49,6 +71,7 @@ export default {
     justify-content: flex-start;
     user-select: none;
     z-index: 1;
+
     .link {
       cursor: default;
       text-decoration: none;
@@ -58,6 +81,7 @@ export default {
       justify-content: flex-start;
       height: 18px;
       position: relative;
+
       &:after {
         content: "";
         position: absolute;
@@ -68,10 +92,12 @@ export default {
         height: 1px;
         background: #000000;
       }
+
       &:hover,
       &:active {
         background-color: $highlightV95;
         color: white;
+
         &:after {
           content: "";
           position: absolute;
@@ -81,10 +107,12 @@ export default {
           height: 1px;
           background: #ffffff;
         }
-        > .submenu {
+
+        >.submenu {
           display: block;
         }
       }
+
       .submenu {
         @include v95;
         color: initial;
@@ -101,6 +129,7 @@ export default {
       }
     }
   }
+
   textarea {
     border-radius: 0px;
     padding: 6px 6px;
@@ -111,6 +140,7 @@ export default {
     box-shadow: none;
     outline: none;
     z-index: 0;
+
     &:focus,
     &:active {
       outline: none;
