@@ -12,7 +12,7 @@
     background-color: $backgroundGrayV95;
 }
 ::-webkit-scrollbar-corner {background-color: transparent;}
-/* Buttons */ 
+/* Buttons */
 ::-webkit-scrollbar-button:single-button {
     @include v95();
     display: block;
