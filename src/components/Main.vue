@@ -1,33 +1,24 @@
 <template>
-  <div
-    class="container"
-    :class="{ fullscreenMode: fullscreenMode, crtMode: crtMode }"
-  >
-    <div>
-      <Desktop
-        :programs="programs"
-        :programsOpen="programsOpen"
-        @openProgram="openProgram"
-        @closeProgram="closeProgram"
-        @minimizeWindow="minimizeWindow"
-        @resetDesktopContext="resetDesktopContext"
-        @fullscreenMode="toggleFullscreenMoode"
-        @crtMode="toggleCrtMode"
-      />
-      <Taskbar
-        :programs="programs"
-        :programsOpen="programsOpen"
-        :desktopStartMenuActive="desktopStartMenuActive"
-        @toggleTaskBar="toggleTaskBar"
-        @openProgram="openProgram"
-        @closeTaskBar="closeTaskBar"
-        @minimizeWindow="minimizeWindow"
-      />
+  <div class="container" :class="{ fullscreenMode: fullscreenMode, crtMode: crtMode }">
+    <div v-if="loggedIn">
+      <Desktop :programs="programs" :programsOpen="programsOpen" @openProgram="openProgram" @closeProgram="closeProgram"
+        @minimizeWindow="minimizeWindow" @resetDesktopContext="resetDesktopContext"
+        @fullscreenMode="toggleFullscreenMoode" @crtMode="toggleCrtMode" />
+      <Taskbar :programs="programs" :programsOpen="programsOpen" :desktopStartMenuActive="desktopStartMenuActive"
+        @toggleTaskBar="toggleTaskBar" @openProgram="openProgram" @closeTaskBar="closeTaskBar"
+        @minimizeWindow="minimizeWindow" />
+    </div>
+    <div v-else>
+      <LoginDesktop :programs="programs" :programsOpen="programsOpen" @openProgram="openProgram"
+        @closeProgram="closeProgram" @minimizeWindow="minimizeWindow" @resetDesktopContext="resetDesktopContext"
+        @fullscreenMode="toggleFullscreenMoode" @crtMode="toggleCrtMode" />
     </div>
   </div>
 </template>
 <script>
+import LoginDesktop from "./desktop/LoginDesktop.vue";
 import Desktop from "./desktop/Desktop.vue";
+
 import Taskbar from "./taskbar/Taskbar.vue";
 import Directory from "../data/Directory.vue";
 export default {
@@ -37,6 +28,7 @@ export default {
   },
   components: {
     Desktop,
+    LoginDesktop,
     Taskbar,
   },
   data() {
@@ -45,20 +37,38 @@ export default {
       crtMode: true,
       desktopStartMenuActive: false,
       programsOpen: [],
+      loggedIn: false,
       programs: Directory,
       savedFiles: [],
     };
   },
+  mounted() {
+    window.addEventListener('resize', this.onResize)
+    this.onResize()
+  },
   methods: {
+    onResize() {
+      this.fullscreenMode = this.fullscreenMode ? true : this.checkIsMobile()
+      console.log(`Resize : ${window.innerWidth}x${window.innerHeight} => Fullscreen: ${this.fullscreenMode}`)
+    },
+    checkIsMobile() {
+      // return false
+      return window.innerWidth <= 720 || window.innerHeight <= 540
+    },
     openProgram(fileName, fileIcon, fileType, files) {
       if (this.programsOpen.find(([title]) => title === fileName)) {
         console.log("found");
       } else {
+        this.programs
+          .filter((row) => row[0] === fileType)
+          .map((row) => row);
         this.programsOpen.push([fileName, fileIcon, fileType, true, files]);
       }
     },
     closeProgram(fileName) {
       console.log("here");
+      if (!this.loggedIn) this.toggleLoggedOn()
+
       for (let i = 0; i < this.programsOpen.length; i++) {
         if (this.programsOpen[i][0] == fileName) this.programsOpen.splice(i, 1);
       }
@@ -85,6 +95,9 @@ export default {
     toggleTaskBar() {
       this.desktopStartMenuActive = !this.desktopStartMenuActive;
     },
+    toggleLoggedOn() {
+      this.loggedIn = !this.loggedIn;
+    },
     closeTaskBar() {
       this.desktopStartMenuActive = false;
     },
@@ -107,77 +120,100 @@ export default {
   font-smooth: never;
   -webkit-font-smoothing: none;
 }
+
 @keyframes flicker {
   0% {
     opacity: 0.27861;
   }
+
   5% {
     opacity: 0.34769;
   }
+
   10% {
     opacity: 0.23604;
   }
+
   15% {
     opacity: 0.90626;
   }
+
   20% {
     opacity: 0.18128;
   }
+
   25% {
     opacity: 0.83891;
   }
+
   30% {
     opacity: 0.65583;
   }
+
   35% {
     opacity: 0.67807;
   }
+
   40% {
     opacity: 0.26559;
   }
+
   45% {
     opacity: 0.84693;
   }
+
   50% {
     opacity: 0.96019;
   }
+
   55% {
     opacity: 0.08594;
   }
+
   60% {
     opacity: 0.20313;
   }
+
   65% {
     opacity: 0.71988;
   }
+
   70% {
     opacity: 0.53455;
   }
+
   75% {
     opacity: 0.37288;
   }
+
   80% {
     opacity: 0.71428;
   }
+
   85% {
     opacity: 0.70419;
   }
+
   90% {
     opacity: 0.7003;
   }
+
   95% {
     opacity: 0.36108;
   }
+
   100% {
     opacity: 0.24387;
   }
 }
+
 .container {
   width: 100%;
   max-width: 640px;
   height: 480px;
   position: relative;
   overflow: hidden;
+
   &.crtMode {
     &:after {
       content: " ";
@@ -193,6 +229,7 @@ export default {
       pointer-events: none;
       animation: flicker 0.15s infinite;
     }
+
     &:before {
       content: " ";
       display: block;
@@ -201,30 +238,29 @@ export default {
       left: 0;
       bottom: 0;
       right: 0;
-      background: linear-gradient(
-          rgba(18, 16, 16, 0) 50%,
-          rgba(0, 0, 0, 0.1) 50%
-        ),
-        linear-gradient(
-          90deg,
+      background: linear-gradient(rgba(18, 16, 16, 0) 50%,
+          rgba(0, 0, 0, 0.1) 50%),
+        linear-gradient(90deg,
           rgba(255, 0, 0, 0.1),
           rgba(0, 255, 0, 0.1),
-          rgba(0, 0, 255, 0.1)
-        );
+          rgba(0, 0, 255, 0.1));
       z-index: 100;
       box-shadow: inset 0 0 100px rgba(0, 0, 0, 1);
       background-size: 100% 3px, 3px 100%;
       pointer-events: none;
     }
   }
+
   &.fullscreenMode {
     max-width: 100%;
     height: 100%;
+
     .desktop {
       height: 100% !important;
     }
   }
-  > div {
+
+  >div {
     height: 100%;
     display: flex;
     align-items: stretch;

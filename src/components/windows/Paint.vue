@@ -11,67 +11,39 @@
     </div>
     <div class="paint-wrapper">
       <div class="toolbar">
-        <div
-          v-for:="(stroke, index) in 6"
-          v-bind:key="index"
-          v-on:click="this.setStroke($event, index)"
-          :class="{ active: index + 1 === selectedStroke }"
-          class="stroke-selector"
-        >
+        <div v-for:="(stroke, index) in 6" v-bind:key="index" v-on:click="this.setStroke($event, index)"
+          :class="{ active: index + 1 === selectedStroke }" class="stroke-selector">
           <div class="stroke">
-            <span
-              v-bind:key="index"
-              v-bind:style="{
-                height: index + 5 + 'px',
-                width: index + 5 + 'px',
-                minHeight: index + 5 + 'px',
-                minWidth: index + 5 + 'px',
-              }"
-            ></span>
+            <span v-bind:key="index" v-bind:style="{
+              height: index + 5 + 'px',
+              width: index + 5 + 'px',
+              minHeight: index + 5 + 'px',
+              minWidth: index + 5 + 'px',
+            }"></span>
           </div>
         </div>
         <div class="stroke-selector">
           <div class="stroke">
-            <img
-              width="9"
-              height="9"
-              :src="require('@/assets/icon/close.png')"
-            />
+            <img width="9" height="9" :src="require('@/assets/icon/close.png')" />
           </div>
         </div>
       </div>
       <div class="canvas-wrapper">
-        <canvas
-          width="634"
-          height="359"
-          ref="canvas"
-          @mousemove="mouseMove"
-          @mousedown="mouseDown"
-        ></canvas>
+        <img v-if="this.imageURL" class="canvas-background" :src="imageURL" id="img">
+        <canvas v-else width="634" height="359" ref="canvas" @mousemove="mouseMove" @mousedown="mouseDown">
+        </canvas>
       </div>
     </div>
     <div class="colors">
       <div class="selected-color">
-        <div
-          class="color"
-          v-bind:style="{ backgroundColor: '#' + this.selectedLeftColor }"
-        ></div>
-        <div
-          class="color"
-          v-bind:style="{ backgroundColor: '#' + this.selectedRightColor }"
-        ></div>
+        <div class="color" v-bind:style="{ backgroundColor: '#' + this.selectedLeftColor }"></div>
+        <div class="color" v-bind:style="{ backgroundColor: '#' + this.selectedRightColor }"></div>
       </div>
       <div class="color-picker">
-        <div
-          class="color"
-          v-for="(color, index) in colors"
-          v-on:click.left.stop="setLeftColor($event, color)"
-          v-on:click.right.stop="setRightColor($event, color)"
-          v-bind:key="index"
-          v-bind:style="{
+        <div class="color" v-for="(color, index) in colors" v-on:click.left.stop="setLeftColor($event, color)"
+          v-on:click.right.stop="setRightColor($event, color)" v-bind:key="index" v-bind:style="{
             backgroundColor: '#' + color,
-          }"
-        ></div>
+          }"></div>
       </div>
     </div>
   </div>
@@ -79,6 +51,10 @@
 <script>
 export default {
   name: "Paint",
+  props: {
+    fileName: String,
+    programsOpen: Array,
+  },
   data() {
     return {
       isMouseClicked: false,
@@ -121,12 +97,35 @@ export default {
         "ff0080",
         "ff8040",
       ],
+      imagePath: [],
+      imageURL: '',
     };
   },
   mounted: function () {
     this.canvas = this.$refs.canvas.getContext("2d");
   },
+  created() {
+    this.loadContent(this.programsOpen, this.fileName)
+  },
   methods: {
+    loadContent(searchDirectory, fileSearch) {
+      let filteredResult = searchDirectory
+        .filter((row) => row[0] === fileSearch)
+        .map((row) => row);
+      this.imagePath = filteredResult[0][4]
+      console.log('Paint URL :' + this.imagePath);
+      if (this.imagePath)
+        fetch(this.imagePath)
+          .then(response => response.url)
+          .then(text => this.imageURL = text)
+          .catch(err => console.log('Error loading file image:', err));
+    },
+    closeProgram(fileName) {
+      this.$emit("closeProgram", fileName);
+    },
+    download(fileName) {
+      window.location.href = fileName
+    },
     setStroke(e, index) {
       this.selectedStroke = index + 1;
     },
@@ -181,6 +180,7 @@ export default {
   flex-direction: column;
   align-items: flex-start;
   justify-content: stretch;
+
   .file-bar {
     background-color: rgba(191, 193, 192, 1);
     padding: 2px 0px 0px 0px;
@@ -189,6 +189,7 @@ export default {
     align-items: center;
     justify-content: flex-start;
     user-select: none;
+
     .link {
       cursor: default;
       padding: 0px 4px 0px 4px;
@@ -197,6 +198,7 @@ export default {
       justify-content: flex-start;
       height: 18px;
       position: relative;
+
       &:after {
         content: '';
         position: absolute;
@@ -206,10 +208,12 @@ export default {
         height: 1px;
         background: #000000;
       }
+
       &:hover,
       &:active {
         background-color: $highlightV95;
         color: white;
+
         &:after {
           content: '';
           position: absolute;
@@ -219,10 +223,12 @@ export default {
           height: 1px;
           background: #FFFFFF;
         }
-        > .submenu {
+
+        >.submenu {
           display: block
         }
       }
+
       .submenu {
         @include v95;
         color: initial;
@@ -238,6 +244,7 @@ export default {
       }
     }
   }
+
   .paint-wrapper {
     height: 100%;
     width: 100%;
@@ -246,6 +253,7 @@ export default {
     align-items: stretch;
     justify-content: space-evenly;
     overflow: hidden;
+
     .canvas-wrapper {
       @include v95Hover;
       height: 100%;
@@ -253,35 +261,41 @@ export default {
       overflow: auto;
     }
   }
+
   .toolbar {
     @include v95Hover;
     overflow: hidden;
     width: 48px;
     padding: 2px 2px 0px 2px;
+
     .stroke-selector {
       @include v95;
       height: 24px;
       width: 24px;
       margin-top: 1px;
       margin-bottom: 5px;
+
       .stroke {
         height: 100%;
         width: 100%;
         display: flex;
         align-items: center;
         justify-content: center;
+
         span {
           display: block;
           border-radius: 100px;
           background-color: black;
         }
       }
+
       &:active,
       &.active {
         @include v95Hover;
       }
     }
   }
+
   .colors {
     padding-top: 2px;
     display: flex;
@@ -289,6 +303,7 @@ export default {
     align-items: flex-start;
     justify-content: flex-start;
   }
+
   .selected-color {
     @include v95Hover;
     min-width: 43px;
@@ -296,14 +311,17 @@ export default {
     width: 44px;
     height: 43px;
     position: relative;
+
     .color {
       margin: 1px 0px 0px 1px;
+
       &:nth-of-type(1) {
         z-index: 2 !important;
         position: absolute;
         left: 7px;
         top: 7px;
       }
+
       &:nth-of-type(2) {
         z-index: 1 !important;
         position: absolute;
@@ -312,6 +330,7 @@ export default {
       }
     }
   }
+
   .color-picker {
     @include v95Hover;
     max-width: 258px;
@@ -321,6 +340,7 @@ export default {
     padding-bottom: 3px;
     padding-left: 3px;
   }
+
   .color {
     @include v95Hover;
     width: 16px;
@@ -330,6 +350,7 @@ export default {
     margin-top: 3px;
     box-shadow: #000000 1px 1px 0px 0px inset;
   }
+
   canvas {
     width: 632px;
     height: 357px;

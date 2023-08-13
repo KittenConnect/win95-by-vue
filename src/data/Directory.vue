@@ -18,7 +18,7 @@ export default [
         true,
         [
           ["My Documents", "MyDocuments", "S3Folder", true, ['MinIO', Folders.MinIO.baseURL, '']],
-          ["My Pictures", "Folder", "Folder", true],
+          ["My Pictures", "Folder", "S3Folder", true, ['MinIO', Folders.MinIO.baseURL, 'IMGs/']],
         ],
       ],
       ["SuperBoot CD-ROM (D:)", "DiskDrive", "S3Folder", true, ['MinIO', Folders.MinIO.baseURL, 'ISOs/']],
@@ -38,11 +38,14 @@ export default [
       ["Notepad", "Notepad", "Notepad", true],
       ["AOL", "AOL", "AOL", true],
       ["Paint", "Paint", "Paint", true],
+      // ["MS-DOS Prompt", "Command", "Command", true, ['C', ['MinIO', Folders.MinIO.baseURL, '']]],
       // ["Kitten Connect", "Internet", "Internet", true, ['https://kittenconnect.net']],
     ],
   ],
   ["Recycle Bin", "RecycleBin", "Folder", true, [
-    ["PinBall", "PinBall", "Internet", true, ['https://alula.github.io/SpaceCadetPinball/index.html']],
+    // ["PinBall", "PinBall", "Internet", true, ['https://alula.github.io/SpaceCadetPinball/index.html']],
+    // ["PinBall", "PinBall", "PinBall", true, ['https://alula.github.io/SpaceCadetPinball/index.html']],
+    ["PinBall", "PinBall", "OpenURL", true, ['https://alula.github.io/SpaceCadetPinball/index.html']],
     ["Very Private WebSite", "Internet", "Internet", true, ['https://www.hamstershub.com/']],
   ]],
   // [

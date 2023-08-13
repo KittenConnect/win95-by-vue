@@ -1,13 +1,10 @@
 <template>
-  <div
-    v-bind:style="{
-      left: this.position[0] + 'px',
-      top: this.position[1] + 'px',
-    }"
-    class="desktopContextMenu"
-  >
-    <div class="link"><span>Arrange Icons</span> <span>›</span></div>
-    <div class="link">Line Up Icons</div>
+  <div v-bind:style="{
+    left: this.position[0] + 'px',
+    top: this.position[1] + 'px',
+  }" class="desktopContextMenu">
+    <!-- <div class="link"><span>Arrange Icons</span> <span>›</span></div>
+    <div class="link">Line Up Icons</div> -->
     <div v-on:click="this.$emit('crtMode')" class="link">Disable&nbsp;CRT/Flicker</div>
     <div v-on:click="this.$emit('fullscreenMode')" class="link">Fullscreen Mode</div>
     <div class="divider"></div>
@@ -38,6 +35,7 @@ export default {
   padding: 2px;
   z-index: 10;
   user-select: none;
+
   .link {
     display: flex;
     align-items: center;
@@ -45,22 +43,24 @@ export default {
     cursor: pointer;
     height: 24px;
     padding: 4px 8px 4px 16px;
+
     &:hover {
       background-color: $highlightV95;
       color: white;
     }
+
     span {
       &:nth-of-type(2) {
         font-weight: bold;
       }
     }
   }
+
   .divider {
     margin-right: 4px;
     border-style: solid;
     border-width: 1px;
-    border-color: rgb(254, 254, 254) rgb(223 223 223) rgb(254, 254, 254)
-      rgb(254, 254, 254);
+    border-color: rgb(254, 254, 254) rgb(223 223 223) rgb(254, 254, 254) rgb(254, 254, 254);
   }
 }
 </style>

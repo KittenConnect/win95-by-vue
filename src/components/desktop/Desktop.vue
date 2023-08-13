@@ -1,9 +1,11 @@
 <template>
   <div ref="desktop" class="desktop" v-on:click.left="resetDesktopContextMenu" v-on:click.right="desktopContextMenu">
+    <div ref="background" class="background" />
     <div class="programs">
       <Window v-bind:key="index" v-for="(program, index) in programsOpen" :fileName="program[0]" :fileIcon="program[1]"
-        :fileType="program[2]" :files="program[4]" :minimize="program[3]" :programsOpen="programsOpen"
-        @openProgram="openProgram" @closeProgram="closeProgram" @minimizeWindow="minimizeWindow">
+        :fileType="program[2]" :files="program[4]" :minimize="program[3]" :fixedSize="program[5]"
+        :programsOpen="programsOpen" @openProgram="openProgram" @closeProgram="closeProgram"
+        @minimizeWindow="minimizeWindow">
         <component :is="program[1]"></component>
       </Window>
       <Program v-for="(program, index) in programs" v-bind:key="index" :fileName="program[0]" :fileIcon="program[1]"
@@ -77,8 +79,17 @@ export default {
   padding: 0;
   position: relative;
   background-color: #008080;
-  background-image: url('/WallpaperDog-5479332.jpg');
-  background-size: contain;
+  background: url('/WallpaperDog-5479332.jpg') no-repeat center center fixed;
+  // background: url('/WallpaperWin95-2023.jpeg') no-repeat center center fixed;
+  -webkit-background-size: cover;
+  -moz-background-size: cover;
+  -o-background-size: cover;
+  background-size: cover;
+  // background-image: url('/WallpaperDog-5479332.jpg');
+  // background-size: contain;
+  // background-repeat: no-repeat;
+  // overflow: hidden;
+  // resize: none;
 
   .programs {
     height: 100%;

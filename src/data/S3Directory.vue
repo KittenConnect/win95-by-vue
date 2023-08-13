@@ -81,8 +81,8 @@ export const fetchS3 = (server, path = '') => {
         let elementName = elementFolder.pop()
         let elementExt = elementName.split('.').pop().toLocaleUpperCase()
 
-        let icon = 'Notepad'
-        let type = "FileDL"
+        let icon = 'Unknown'
+        let type = "OpenURL"
         let data = [`${serverIndex}/${elementPath}`]
 
         switch (elementExt) {
@@ -91,11 +91,34 @@ export const fetchS3 = (server, path = '') => {
             icon = 'DiskDrive'
             break;
           case 'TXT':
-          case 'PDF':
+          case 'MD':
           case elementName.toLocaleUpperCase():
             icon = 'WordPad'
             type = 'notepad'
             console.log('S3 TextFile')
+            console.log(data[0])
+            // data = []
+            break;
+          case 'PDF':
+            icon = 'WordPad'
+            console.log('S3 PDF-File')
+            console.log(data[0])
+            // data = []
+            break;
+          case 'PNG':
+          case 'JPG':
+          case 'JPEG':
+            icon = 'Paint'
+            type = 'internet'
+            console.log('S3 ImageFile')
+            console.log(data[0])
+            // data = []
+            break;
+          case 'HTM':
+          case 'HTML':
+            icon = 'Internet'
+            type = 'internet'
+            console.log('S3 InternetLink')
             console.log(data[0])
             // data = []
             break;

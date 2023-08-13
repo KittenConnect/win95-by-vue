@@ -23,6 +23,7 @@ export default {
     return {
       fileContent: '',
       realPath: [],
+      saveButton: false,
     };
   },
   props: {
@@ -43,16 +44,18 @@ export default {
         fetch(this.realPath)
           .then(response => response.text())
           .then(text => this.fileContent = text)
+          .then(() => this.saveButton = true)
           .catch(err => console.log('Error loading file text:', err));
     },
     download(fileName) {
-      window.location.href = fileName
-    },
-    closeProgram(fileName) {
-      this.$emit("closeProgram", fileName);
+      if (fileName) window.location.href = fileName
+      else window.open("data:x-application/text," + escape(this.fileContent))
     },
   },
-};
+  closeProgram(fileName) {
+    this.$emit("closeProgram", fileName);
+  },
+}
 </script>
 <style lang="scss" scoped>
 .notepad {
@@ -79,6 +82,7 @@ export default {
       display: flex;
       align-items: center;
       justify-content: flex-start;
+      pointer-events: all;
       height: 18px;
       position: relative;
 

@@ -1,6 +1,7 @@
 <template>
-  <div style="height: { height }; width: { width }; z-index: 2" @mousedown="windowMouseDown($event)"
-    v-on:click.right.stop="preventDefault($event)" v-if="minimize" class="window" :class="{ maximize: maximizeWindow }">
+  <div :style="{ height: win.height, width: win.width, resize: win.resizable ? 'auto' : 'none' }" style="z-index: 2;"
+    @mousedown="windowMouseDown($event)" v-on:click.right.stop="preventDefault($event)" v-if="minimize" class="window"
+    :class="{ maximize: maximizeWindow }">
     <div class="menu-bar" @dblclick.stop="doubleClick($event)" @mousedown="mouseDown($event)" @mouseup="mouseUp()"
       @mousemove="mouseMove($event)" @mouseleave="mouseLeave($event)">
       <div class="title">
@@ -29,6 +30,7 @@
   </div>
 </template>
 <script>
+import Login from "./Login.vue";
 import Notepad from "./Notepad.vue";
 import Paint from "./Paint.vue";
 import Internet from "./Internet.vue";
@@ -36,7 +38,8 @@ import AOL from "./AOL.vue";
 import Dialog from "./Dialog.vue";
 import Folder from "./Folder.vue";
 import S3Folder from "./S3Folder.vue";
-import FileDL from "./FileDL.vue";
+import OpenURL from "./OpenURL.vue";
+import Command from "./Command.vue";
 
 // import PinBall from "./games/PinBall.vue";
 
@@ -47,6 +50,11 @@ export default {
   data() {
     return {
       loadedProgram: this.fileType,
+      win: {
+        height: this.height || '65%',
+        width: this.width || '75%',
+        resizable: !this.fixedSize,
+      },
       pointer: {
         state: "up",
         xDiff: 0,
@@ -56,6 +64,7 @@ export default {
     };
   },
   components: {
+    Login,
     Notepad,
     Folder,
     S3Folder,
@@ -63,7 +72,8 @@ export default {
     Internet,
     AOL,
     Dialog,
-    FileDL,
+    OpenURL,
+    Command,
     /* Games */
     // PinBall,
   },
@@ -73,6 +83,7 @@ export default {
     fileType: String,
     height: String,
     width: String,
+    fixedSize: Boolean,
     minimize: Boolean,
     programsOpen: Array,
   },
@@ -161,8 +172,8 @@ export default {
   overflow: auto;
   top: 10%;
   left: 10%;
-  height: 55%;
-  width: 55%;
+  // height: 55%;
+  // width: 55%;
   min-height: 150px;
   min-width: 310px;
   padding: 2px;

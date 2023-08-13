@@ -23,11 +23,11 @@
       <div class="dialog-body">
         <div class="content">
           <img :src="require('@/assets/icon/Warning.png')" width="32" height="32" />
-          <div>Do You Want to download {{ fileName }} ?</div>
+          <div>Cannot display {{ fileName }}.<br /> Do you really want to open it ?</div>
         </div>
         <div class="dialog-buttons">
-          <div class="button" v-on:click="closeProgram">No</div>
           <div class="button" v-on:click="download(realPath)">Yes</div>
+          <div class="button" v-on:click="closeProgram">No</div>
         </div>
       </div>
     </div>
@@ -69,7 +69,7 @@ export default {
 </script>
 <style lang="scss" scoped>
 .dialog {
-  position: fixed;
+  // position: fixed;
   top: 0;
   right: 0;
   bottom: 0;
