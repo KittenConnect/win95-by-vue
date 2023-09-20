@@ -14,13 +14,13 @@
       <div class="link">Help</div>
     </div>
     <!-- <textarea v-model="fileContent" autofocus></textarea> -->
-    <vue-command :prompt="prompt" :hide-bar="true" font="W95A" :commands="commands" />
+    <vue-command v-if="prompt" :prompt="prompt" :hide-bar="true" font="W95A" :commands="commands" />
   </div>
 </template>
 <script>
-import VueCommand, { createStdout } from "vue-command";
+import VueCommand, { createStdout, tableFormatter } from "vue-command";
 import S3Directory from "../../data/S3Directory.vue";
-import { Folders } from "../../data/S3Directory.vue";
+import { Folders, getInfos } from "../../data/S3Directory.vue";
 import "vue-command/dist/vue-command.css";
 
 export default {
@@ -31,13 +31,19 @@ export default {
       remoteDirectory: [],
       workingDirectory: '/',
       workingDisk: 'C',
-      prompt: `> `,
+      prompt: ``,
       commands: {
         "hello": () => createStdout("Hello world"),
         "exit": () => this.closeProgram(this.fileName),
         // "cd": () => this.,
-        "cd": (args) => { if (args.length != 2); this.changeDirectory(args[1]); return createStdout(`${this.workingDirectory}`) },
-        "dir": (args) => { console.log(args); this.listDirectory(args[1]); return createStdout(`${this.workingDirectory}`) },
+        "cd": async (args) => { if (args.length != 2); await this.changeDirectory(args[1]); return createStdout(`${this.workingDirectory}`) },
+        "dir": (args) => {
+          console.log(args); return createStdout(tableFormatter(
+            this.remoteDirectory.map(
+              a => getInfos(a)
+            )
+          ));
+        },
         "reboot": () => { /* Mimic Win95-era reboot rundll invocation + reload page */
           localStorage.clear()
           location.reload()
@@ -58,17 +64,40 @@ export default {
     this.changeDirectory()
   },
   methods: {
-    changeDirectory(path = '/') {
-      if (!path.startsWith('/')) {
-        path = `${this.workingDirectory}/${path}`
+    async changeDirectory(path = '/') {
+      if (path === '..') {
+        let p = this.workingDirectory.split('/').filter(e => e)
+        p.pop()
+        path = "/" + [...p].join('/')
       }
-      S3Directory(Folders.MinIO, this.workingDirectory).then(
-        (data) => {
-          this.remoteDirectory = data
-          this.workingDirectory = path
-          this.prompt = `${this.workingDisk}:${this.workingDirectory.split('/').join('\\')}> `
-        }
-      )
+      if (!path.startsWith('/')) {
+        let p = this.workingDirectory.split('/').filter(e => e)
+        path = "/" + [...p, path].join('/')
+        console.log(p)
+        console.log(path)
+      }
+      this.remoteDirectory = await S3Directory(Folders.MinIO, path)
+      this.workingDirectory = path
+      this.prompt = `${this.workingDisk}:${this.workingDirectory.split('/').join('\\')}> `
+      // if (!this.loaded) this.loaded = true
+      // console.log('before')
+      // (async () => {
+      //   let dir = await .then((data) => data)
+      //
+      //   this.workingDirectory = path
+      //   this.prompt = `${this.workingDisk}:${this.workingDirectory.split('/').join('\\')}> `
+      //   if (!this.loaded) this.loaded = true
+      //   // console.log('after-before before-after')
+      //   //   (data) => {
+      //   //     this.remoteDirectory = data
+      //   //     this.workingDirectory = path
+      //   //     this.prompt = `${this.workingDisk}:${this.workingDirectory.split('/').join('\\')}> `
+      //   //     if (!this.loaded) this.loaded = true
+      //   //     console.log('after-before before-after')
+      //   //   }
+      //   // )
+      // })();
+      // console.log('after')
     },
     listDirectory() {
       // this.workingDirectory = path

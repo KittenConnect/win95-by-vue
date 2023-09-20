@@ -52,8 +52,8 @@ export default {
       else window.open("data:x-application/text," + escape(this.fileContent))
     },
   },
-  closeProgram(fileName) {
-    this.$emit("closeProgram", fileName);
+  closeProgram() {
+    this.$emit("closeProgram", this.fileName);
   },
 }
 </script>

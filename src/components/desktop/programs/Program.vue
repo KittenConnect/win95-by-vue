@@ -4,7 +4,7 @@
       backgroundImage:
         'url(' + require('@/assets/icon/' + fileIcon + '.png') + ')',
     }"></span>
-    <span class="title">{{ truncate(fileName, 30) }}</span>
+    <span class="title">{{ truncate(fileName, 28) }}</span>
   </div>
 </template>
 <script>

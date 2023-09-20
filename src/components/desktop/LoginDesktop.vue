@@ -13,7 +13,7 @@
             <Window v-bind:key="index" v-for="(program, index) in programsOpen" :fileName="program[0]"
                 :fileIcon="program[1]" :fileType="program[2]" :files="program[4]" :minimize="program[3]"
                 :programsOpen="programsOpen" @openProgram="openProgram" @closeProgram="closeProgram"
-                @minimizeWindow="minimizeWindow" :fixedSize="true" height="210px" width="400px">
+                @minimizeWindow="minimizeWindow" x="5%" y="5%">
                 <component :is="program[1]"></component>
             </Window>
             <!-- <Program v-for="(program, index) in programs" v-bind:key="index" :fileName="program[0]" :fileIcon="program[1]"
@@ -46,16 +46,13 @@ export default {
         programsOpen: Object,
         savedFiles: Object,
     },
-    data() {
-        // return {
-        //     desktopContextMenuActive: false,
-        //     desktopVolumeMenuActive: false,
-        //     desktopContextMenuPosition: [0, 0],
-        // };
-    },
-    mounted() {
-        this.openProgram("Welcome To KittenOS", 'Login', 'Login')
-    },
+    // data() {
+    //     // return {
+    //     //     desktopContextMenuActive: false,
+    //     //     desktopVolumeMenuActive: false,
+    //     //     desktopContextMenuPosition: [0, 0],
+    //     // };
+    // },
     methods: {
         openProgram(fileName, fileIcon, fileType, files) {
             this.$emit("openProgram", fileName, fileIcon, fileType, files);

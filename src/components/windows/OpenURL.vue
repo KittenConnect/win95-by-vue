@@ -5,7 +5,7 @@
         <div class="title">
           <span class="icon" :style="{
             backgroundImage:
-              'url(' + require('@/assets/icon/Warning.png') + ')',
+              'url(' + require('@/assets/icon/' + fileIcon + '.png') + ')',
           }"></span><span>Confirmation needed</span>
         </div>
         <div class="actions">
@@ -39,6 +39,7 @@ export default {
   data() {
     return {
       realPath: [],
+      fileIcon: [],
     };
   },
   props: {
@@ -54,6 +55,7 @@ export default {
         .filter((row) => row[0] === fileSearch)
         .map((row) => row);
       console.log('File DL :');
+      this.fileIcon = filteredResult[0][1];
       this.realPath = filteredResult[0][4];
       console.log(this.realPath);
     },
@@ -190,6 +192,7 @@ export default {
         margin: 4px;
         pointer-events: auto;
         display: flex;
+        flex-direction: column;
 
         &:active,
         &:focus {

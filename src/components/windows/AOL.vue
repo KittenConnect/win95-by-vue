@@ -22,7 +22,10 @@ export default {
     },
   },
   mounted() {
+    this.$emit("maximize");
+    this.$emit("toggleTaskBar");
     window.addEventListener("keypress", function (e) {
+      this.$emit("toggleTaskBar")
       this.closeProgram(this.fileName, e);
     }.bind(this));
   }
@@ -30,11 +33,10 @@ export default {
 </script>
 <style lang="scss" scoped>
 .AOL {
-  position: fixed;
-  display: flex;
+  display: block;
   justify-content: space-around;
   align-items: center;
-  position: fixed;
+  position: absolute;
   left: 0;
   top: 0;
   width: 100%;
@@ -46,9 +48,9 @@ export default {
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    position: fixed;
-    min-width: 640px;
-    min-height: 480px;
+    position: absolute;
+    min-width: 100%;
+    min-height: 100%;
     color: white;
     font-size: 16px;
     line-height: 20px;
@@ -77,4 +79,5 @@ export default {
       opacity: 0;
     }
   }
-}</style>
+}
+</style>

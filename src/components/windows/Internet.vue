@@ -25,7 +25,7 @@ export default {
       let filteredResult = searchDirectory
         .filter((row) => row[0] === fileSearch)
         .map((row) => row);
-      this.openURL = filteredResult[0][4] || ['https://en.m.wikipedia.org/wiki/Windows_95'];
+      this.openURL = filteredResult[0][4] || [/*'https://en.m.wikipedia.org/wiki/Windows_95', */'https://pierrepapierciseaux.net/.skynet/'];
       console.log(this.openURL);
     },
     closeProgram(fileName) {

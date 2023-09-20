@@ -120,8 +120,8 @@ export default {
           .then(text => this.imageURL = text)
           .catch(err => console.log('Error loading file image:', err));
     },
-    closeProgram(fileName) {
-      this.$emit("closeProgram", fileName);
+    closeProgram() {
+      this.$emit("closeProgram", this.fileName);
     },
     download(fileName) {
       window.location.href = fileName

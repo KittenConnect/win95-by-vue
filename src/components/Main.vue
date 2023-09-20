@@ -1,13 +1,12 @@
 <template>
-  <div class="container" :class="{ fullscreenMode: fullscreenMode, crtMode: crtMode }">
+  <div class="container" :class="{ fullscreenMode: fullscreenMode, crtMode: crtMode }" v-on:click.right="noContextMenu">
     <div v-if="loggedIn">
       <Desktop :programs="programs" :programsOpen="programsOpen" @openProgram="openProgram" @closeProgram="closeProgram"
         @toggleTaskBar="toggleTaskBar" @minimizeWindow="minimizeWindow" @resetDesktopContext="resetDesktopContext"
         @fullscreenMode="toggleFullscreenMode" @crtMode="toggleCrtMode" />
       <Taskbar v-if="taskbarActive" :programs="programs" :programsOpen="programsOpen"
         :desktopStartMenuActive="desktopStartMenuActive" @toggleStartMenu="toggleStartMenu" @toggleTaskBar="toggleTaskBar"
-        @toggleLoggedOn="toggleLoggedOn" @openProgram="openProgram" @closeStartMenu="closeStartMenu"
-        @minimizeWindow="minimizeWindow" />
+        @toggleLoggedOn="toggleLoggedOn" @openProgram="openProgram" @minimizeWindow="minimizeWindow" />
     </div>
     <div v-else-if="programsOpen.length > 0">
       <LoginDesktop :programs="programs" :programsOpen="programsOpen" @openProgram="openProgram"
@@ -71,22 +70,35 @@ export default {
     },
     openProgram(fileName, fileIcon, fileType, files) {
       if (this.programsOpen.find(([title]) => title === fileName)) {
-        console.log("found");
+        console.log(`${fileName} found`);
       } else {
-        console.log(this.programs
-          .filter((row) => row[0] === fileType)
-          .map((row) => row));
+        console.log(`Opening ${fileName}`);
+
+        // console.log(this.programs
+        //   .filter((row) => row[0] === fileType)
+        //   .map((row) => row));
+
         this.programsOpen.push([fileName, fileIcon, fileType, true, files]);
+        this.toggleStartMenu(false)
       }
+
     },
     closeProgram(fileName) {
-      console.log("here");
-      // console.log(fileName)
-      if (fileName === this.loginTitle && !this.loggedIn) this.toggleLoggedOn()
+      console.log(`Closing ${fileName}`);
+
+      if (fileName === this.loginTitle && !this.loggedIn) this.toggleLoggedOn() // Special Win95 Case
 
       for (let i = 0; i < this.programsOpen.length; i++) {
-        if (this.programsOpen[i][0] == fileName) this.programsOpen.splice(i, 1);
+        console.log(this.programsOpen[i])
+        if (this.programsOpen[i][0] == fileName) {
+          console.log(`closing ${i}`)
+          this.programsOpen.splice(i, 1);
+        }
       }
+
+      console.log(this.programsOpen)
+
+      this.toggleStartMenu(false)
     },
     saveFile(fileName, fileIcon, fileType) {
       if (this.programsOpen.find(([title]) => title === fileName)) {
@@ -99,7 +111,10 @@ export default {
       }
     },
     minimizeWindow(fileName) {
-      if (!this.taskbarActive) return
+      if (!this.taskbarActive) return // refuse minimizing if taskbar is hiden
+
+      this.toggleStartMenu(false)
+
       for (let i = 0; i < this.programsOpen.length; i++) {
         if (this.programsOpen[i][0] == fileName)
           this.programsOpen[i][3] = !this.programsOpen[i][3];
@@ -108,32 +123,36 @@ export default {
     resetDesktopContext() {
       this.desktopStartMenuActive = false;
     },
-    toggleStartMenu() {
-      this.desktopStartMenuActive = !this.desktopStartMenuActive;
+    toggleStartMenu(state = undefined) {
+      console.log(state)
+      if (state !== undefined) this.desktopStartMenuActive = state;
+      else this.desktopStartMenuActive = !this.desktopStartMenuActive;
     },
     toggleLoggedOn() {
       this.loggedIn = !this.loggedIn;
       this.taskbarActive = this.loggedIn;
     },
-    toggleTaskBar() {
-      this.taskbarActive = !this.taskbarActive;
+    toggleTaskBar(state = undefined) {
+      if (state !== undefined) this.taskbarActive = state;
+      else this.taskbarActive = !this.taskbarActive;
+
+      console.log(`Toogling TaskBar [${state}] => ${this.taskbarActive}`)
+
       if (!this.taskbarActive) this.fullscreenMode = this.fullscreenMode ? this.checkIsMobile() : this.fullscreenMode
     },
     closeStartMenu() {
       this.desktopStartMenuActive = false;
     },
-    // showTaskBar() {
-    //   this.taskbarActive = true;
-    // },
-    // hideTaskBar() {
-    //   this.taskbarActive = false;
-    // },
     toggleFullscreenMode(mode = undefined) {
-      if (mode === undefined) this.fullscreenMode = !this.fullscreenMode;
-      else this.fullscreenMode = mode
+      if (mode !== undefined) this.fullscreenMode = mode;
+      else this.fullscreenMode = !this.fullscreenMode;
     },
     toggleCrtMode() {
       this.crtMode = !this.crtMode;
+    },
+    noContextMenu(e) {
+      e.preventDefault();
+      e.stopPropagation();
     },
   },
 };

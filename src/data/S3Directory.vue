@@ -4,16 +4,33 @@ export const Folders = {
   MinIO: { prettyName: 'Min.IO', baseURL: 'https://public.s3.svc.kittencorp.net' }
 }
 
-export const fetchS3 = (server, path = '') => {
+export const getInfos = (entry) => {
+  switch (entry[2].toLocaleLowerCase()) {
+    case "s3folder":
+      return [entry[0], '<Dir>', [entry[4][1], entry[4][2]].join('/')]
+    case "internet":
+    case "notepad":
+      return [entry[0], entry[1], entry[4]]
+    default:
+      return entry
+    // return undefined
+  }
+}
+
+export const fetchS3 = (server, path = '/') => {
   const serverIndex = server.baseURL
+  if (!path.endsWith('/')) path = path + '/'
+  if (path.startsWith('/')) path = path.replace('/', '')
+  console.log(`S3 Path: ${path}`);
+
   // let rootContent = []
 
   return fetch(`${serverIndex}/?prefix=${path}&delimiter=/`)
     .then(response => response.text())
     .then(str => (new window.DOMParser()).parseFromString(str, "text/xml"))
     .then(data => {
+      let directoryContents = [];
       console.log(data)
-      let directoryContents = []
 
       // Get all <contents> tags
       let folders = data.getElementsByTagName('CommonPrefixes')
@@ -25,34 +42,8 @@ export const fetchS3 = (server, path = '') => {
 
         let elementPath = currentElement.getElementsByTagName('Prefix')[0].childNodes[0].nodeValue
         let elem = elementPath.split('/'); elem.pop()
-        // if (!elementPath.startsWith('ISOs/')) continue
 
         let elementFolder = elem.pop()
-        // let elementName = elem.pop()
-        // let elementExt = elementName.split('.').pop().toLocaleUpperCase()
-        // console.log(`${elementPath} - ${elementFolder}`)
-        // console.log(elem)
-
-
-        // let icon = 'Programs'
-
-        // switch (elementExt) {
-        //   case 'ISO':
-        //   case 'IMG':
-        //     // console.log(`${elementName} -> ISO CD-ROM`)
-        //     icon = 'DiskDrive'
-        //     break;
-        //   case 'TXT':
-        //   case 'PDF':
-        //     // console.log(`${elementName} -> ISO CD-ROM`)
-        //     icon = 'WordPad'
-        //     break;
-
-        //   default:
-        //     break;
-        // }
-
-        // let folderSettings
 
         let elementSettings = [
           `${elementFolder}`,
@@ -60,9 +51,6 @@ export const fetchS3 = (server, path = '') => {
           "S3Folder",
           true,
           [server.prettyName, server.baseURL, elementPath],
-          // [`${serverIndex}/${elementPath}`]
-          // serverIndex + elementPath,
-          // elementPath
         ]
 
         // Add element to directoryContents
@@ -86,6 +74,15 @@ export const fetchS3 = (server, path = '') => {
         let data = [`${serverIndex}/${elementPath}`]
 
         switch (elementExt) {
+          case 'ZIP':
+          case 'RAR':
+          case '7Z':
+          case 'TAR':
+          case 'GZ':
+          case 'XZ':
+          case 'LZMA':
+            icon = 'WinZip'
+            break;
           case 'ISO':
           case 'IMG':
             icon = 'DiskDrive'
@@ -138,10 +135,10 @@ export const fetchS3 = (server, path = '') => {
         // Add element to directoryContents
         directoryContents.push(elementSettings)
       }
-
       return directoryContents
     })
-    .catch(err => console.log('Error loading xml:', err));
+    .catch(err => console.log('Error loading xml:', err))
+
 }
 
 export default fetchS3

@@ -1,7 +1,6 @@
 <template>
-  <div :style="{ height: win.height, width: win.width, resize: win.resizable ? 'auto' : 'none' }" style="z-index: 2;"
-    @mousedown="windowMouseDown($event)" v-on:click.right.stop="preventDefault($event)" v-if="minimize" class="window"
-    :class="{ maximize: maximizeWindow }">
+  <div style="z-index: 2;" @mousedown="windowMouseDown($event)" v-on:click.right.stop="preventDefault($event)"
+    v-if="minimize" ref="window" class="window" :class="{ maximize: maximizeWindow }">
     <div class="menu-bar" @dblclick.stop="doubleClick($event)" @mousedown="mouseDown($event)" @mouseup="mouseUp()"
       @mousemove="mouseMove($event)" @mouseleave="mouseLeave($event)">
       <div class="title">
@@ -15,7 +14,7 @@
         <div v-on:click="minimizeWindow()" @mouseleave="releaseWindow()">
           <img :src="require('@/assets/icon/minimize.png')" />
         </div>
-        <div v-on:click="maximize()" @mouseleave="releaseWindow()">
+        <div v-on:click="maximize()" v-if="!win.fixed" @mouseleave="releaseWindow()">
           <img :src="require('@/assets/icon/maximize.png')" />
         </div>
         <div v-on:click="closeProgram" @mouseleave="releaseWindow()">
@@ -25,7 +24,8 @@
     </div>
     <div class="loaded-program">
       <component :is="loadedProgram" :fileName="fileName" :fileIcon="fileIcon" :fileType="fileType"
-        :programsOpen="programsOpen" @openProgram="openProgram" @closeProgram="closeProgram"></component>
+        :programsOpen="programsOpen" @maximize="maximize()" @toggleTaskBar="toggleTaskBar" @openProgram="openProgram"
+        @closeProgram="closeProgram" @resizeWindow="resizeWindow"></component>
     </div>
   </div>
 </template>
@@ -41,7 +41,7 @@ import S3Folder from "./S3Folder.vue";
 import OpenURL from "./OpenURL.vue";
 import Command from "./Command.vue";
 
-// import PinBall from "./games/PinBall.vue";
+import PainBall from "./games/PainBall.vue";
 
 import { truncate } from "../../data/S3Directory.vue";
 
@@ -51,9 +51,11 @@ export default {
     return {
       loadedProgram: this.fileType,
       win: {
-        height: this.height || '65%',
-        width: this.width || '75%',
-        resizable: !this.fixedSize,
+        // height: this.height || '45%',
+        // width: this.width || '45%',
+        // x: this.x || '10%',
+        // y: this.y || '10%',
+        fixed: this.fixedSize,
       },
       pointer: {
         state: "up",
@@ -75,7 +77,7 @@ export default {
     OpenURL,
     Command,
     /* Games */
-    // PinBall,
+    PainBall,
   },
   props: {
     fileName: String,
@@ -83,11 +85,25 @@ export default {
     fileType: String,
     height: String,
     width: String,
+    x: String,
+    y: String,
     fixedSize: Boolean,
     minimize: Boolean,
     programsOpen: Array,
   },
   mounted: function () {
+    this.resizeWindow(this.width, this.height)
+    this.moveWindow(this.x, this.y)
+
+    let sister = this.$refs.window.previousElementSibling
+    if (sister) {
+      this.$refs.window.style.left = `calc(${sister.style.left} + 5%)`;
+      this.$refs.window.style.top = `calc(${sister.style.top} + 5%)`;
+    } else {
+      this.$refs.window.style.left = `5%`;
+      this.$refs.window.style.top = `5%`;
+    }
+
     this.zCycle();
   },
   methods: {
@@ -108,12 +124,13 @@ export default {
       elmt.style.zIndex = maxIndex + 2;
     },
     doubleClick(event) {
-      this.maximizeWindow = !this.maximizeWindow;
+      if (!this.win.fixed) this.maximize()
       event.preventDefault();
     },
     mouseDown(event) {
       // Dragging
       let elmt = event.target.parentNode;
+      if (elmt.classList.contains('actions')) return
       this.pointer.state = "down";
       if (this.pointer.yDiff == 0)
         this.pointer.yDiff = elmt.offsetTop - event.clientY;
@@ -155,6 +172,25 @@ export default {
     minimizeWindow() {
       this.$emit("minimizeWindow", this.fileName);
     },
+    moveWindow(x = undefined, y = undefined) {
+      let elmt = this.$refs.window;
+      console.log(`Moving Window to (${x}, ${y})`)
+      // if (x) this.win.x = x
+      // if (y) this.win.y = y
+      // if (resizable !== undefined) this.win.resizable = resizable
+      if (x) elmt.style.left = x
+      if (y) elmt.style.top = y
+    },
+    resizeWindow(width = undefined, height = undefined, fixed = undefined) {
+      let elmt = this.$refs.window;
+
+      if (width) elmt.style.width = width
+      if (height) elmt.style.height = height
+      if (fixed !== undefined) { this.win.fixed = fixed; elmt.style.resize = fixed ? 'none' : 'both' }
+    },
+    toggleTaskBar(state = undefined) {
+      this.$emit("toggleTaskBar", state);
+    },
     maximize() {
       this.maximizeWindow = !this.maximizeWindow;
     },
@@ -170,10 +206,8 @@ export default {
   position: absolute;
   resize: both;
   overflow: auto;
-  top: 10%;
-  left: 10%;
-  // height: 55%;
-  // width: 55%;
+  height: 55%;
+  width: 55%;
   min-height: 150px;
   min-width: 310px;
   padding: 2px;
@@ -231,6 +265,10 @@ export default {
       flex-direction: row;
       align-items: center;
       justify-content: flex-end;
+
+      img {
+        pointer-events: none;
+      }
 
       div {
         width: 16px;

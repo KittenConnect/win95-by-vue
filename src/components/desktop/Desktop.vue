@@ -2,10 +2,10 @@
   <div ref="desktop" class="desktop" v-on:click.left="resetDesktopContextMenu" v-on:click.right="desktopContextMenu">
     <div ref="background" class="background" />
     <div class="programs">
-      <Window v-bind:key="index" v-for="(program, index) in programsOpen" :fileName="program[0]" :fileIcon="program[1]"
+      <Window v-bind:key="program[0]" v-for="program in programsOpen" :fileName="program[0]" :fileIcon="program[1]"
         :fileType="program[2]" :files="program[4]" :minimize="program[3]" :fixedSize="program[5]"
         :programsOpen="programsOpen" @openProgram="openProgram" @closeProgram="closeProgram"
-        @minimizeWindow="minimizeWindow">
+        @minimizeWindow="minimizeWindow" @toggleTaskBar="toggleTaskBar" @fullscreenMode="toggleFullScreen">
         <component :is="program[1]"></component>
       </Window>
       <Program v-for="(program, index) in programs" v-bind:key="index" :fileName="program[0]" :fileIcon="program[1]"
@@ -54,6 +54,12 @@ export default {
     minimizeWindow(fileName) {
       this.$emit("minimizeWindow", fileName);
     },
+    toggleTaskBar(state = undefined) {
+      this.$emit("toggleTaskBar", state);
+    },
+    toggleFullScreen() {
+      this.$emit("fullscreenMode");
+    },
     resetDesktopContextMenu() {
       this.$emit("resetDesktopContext");
       this.desktopContextMenuActive = false;
@@ -68,6 +74,9 @@ export default {
       this.desktopContextMenuPosition[1] =
         e.pageY - this.$refs.desktop.getBoundingClientRect().top;
       this.desktopContextMenuActive = true;
+      console.log(`Opening Desktop Context Menu`)
+      console.log(this.desktopContextMenuPosition)
+      console.log([this.$refs.desktop.getBoundingClientRect().width, this.$refs.desktop.getBoundingClientRect().height])
     },
   },
 };
@@ -75,7 +84,7 @@ export default {
 <style lang="scss" scoped>
 .desktop {
   width: 100%;
-  height: 452px;
+  height: 100%;
   padding: 0;
   position: relative;
   background-color: #008080;
