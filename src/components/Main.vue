@@ -2,17 +2,27 @@
   <div class="container" :class="{ fullscreenMode: fullscreenMode, crtMode: crtMode }">
     <div v-if="loggedIn">
       <Desktop :programs="programs" :programsOpen="programsOpen" @openProgram="openProgram" @closeProgram="closeProgram"
-        @minimizeWindow="minimizeWindow" @resetDesktopContext="resetDesktopContext"
-        @fullscreenMode="toggleFullscreenMoode" @crtMode="toggleCrtMode" />
-      <Taskbar :programs="programs" :programsOpen="programsOpen" :desktopStartMenuActive="desktopStartMenuActive"
-        @toggleTaskBar="toggleTaskBar" @openProgram="openProgram" @closeTaskBar="closeTaskBar"
+        @toggleTaskBar="toggleTaskBar" @minimizeWindow="minimizeWindow" @resetDesktopContext="resetDesktopContext"
+        @fullscreenMode="toggleFullscreenMode" @crtMode="toggleCrtMode" />
+      <Taskbar v-if="taskbarActive" :programs="programs" :programsOpen="programsOpen"
+        :desktopStartMenuActive="desktopStartMenuActive" @toggleStartMenu="toggleStartMenu" @toggleTaskBar="toggleTaskBar"
+        @toggleLoggedOn="toggleLoggedOn" @openProgram="openProgram" @closeStartMenu="closeStartMenu"
         @minimizeWindow="minimizeWindow" />
     </div>
-    <div v-else>
+    <div v-else-if="programsOpen.length > 0">
       <LoginDesktop :programs="programs" :programsOpen="programsOpen" @openProgram="openProgram"
         @closeProgram="closeProgram" @minimizeWindow="minimizeWindow" @resetDesktopContext="resetDesktopContext"
-        @fullscreenMode="toggleFullscreenMoode" @crtMode="toggleCrtMode" />
+        @fullscreenMode="toggleFullscreenMode" @crtMode="toggleCrtMode" />
     </div>
+    <div v-else class="shutdown-screen">
+      <span class="shutdown-message">It’s now safe to turn off your computer.</span>
+
+      <span class="messages">This can be done by closing the page, or you can press Ctrl+R to reboot the computer.</span>
+
+    </div>
+    <span v-if="!fullscreenMode" ref="bottom-message" class="bottom-message">Reboot is invoked by reloading
+      the page. ESC can close stuck windows if you click outside the screen.
+    </span>
   </div>
 </template>
 <script>
@@ -36,15 +46,19 @@ export default {
       fullscreenMode: false,
       crtMode: true,
       desktopStartMenuActive: false,
+      taskbarActive: false,
       programsOpen: [],
       loggedIn: false,
       programs: Directory,
       savedFiles: [],
+      loginTitle: "Welcome To KittenOS Secret File Server"
     };
   },
   mounted() {
     window.addEventListener('resize', this.onResize)
     this.onResize()
+
+    if (!this.loggedIn) this.openProgram(this.loginTitle, 'Login', 'Login')
   },
   methods: {
     onResize() {
@@ -59,15 +73,16 @@ export default {
       if (this.programsOpen.find(([title]) => title === fileName)) {
         console.log("found");
       } else {
-        this.programs
+        console.log(this.programs
           .filter((row) => row[0] === fileType)
-          .map((row) => row);
+          .map((row) => row));
         this.programsOpen.push([fileName, fileIcon, fileType, true, files]);
       }
     },
     closeProgram(fileName) {
       console.log("here");
-      if (!this.loggedIn) this.toggleLoggedOn()
+      // console.log(fileName)
+      if (fileName === this.loginTitle && !this.loggedIn) this.toggleLoggedOn()
 
       for (let i = 0; i < this.programsOpen.length; i++) {
         if (this.programsOpen[i][0] == fileName) this.programsOpen.splice(i, 1);
@@ -84,6 +99,7 @@ export default {
       }
     },
     minimizeWindow(fileName) {
+      if (!this.taskbarActive) return
       for (let i = 0; i < this.programsOpen.length; i++) {
         if (this.programsOpen[i][0] == fileName)
           this.programsOpen[i][3] = !this.programsOpen[i][3];
@@ -92,17 +108,29 @@ export default {
     resetDesktopContext() {
       this.desktopStartMenuActive = false;
     },
-    toggleTaskBar() {
+    toggleStartMenu() {
       this.desktopStartMenuActive = !this.desktopStartMenuActive;
     },
     toggleLoggedOn() {
       this.loggedIn = !this.loggedIn;
+      this.taskbarActive = this.loggedIn;
     },
-    closeTaskBar() {
+    toggleTaskBar() {
+      this.taskbarActive = !this.taskbarActive;
+      if (!this.taskbarActive) this.fullscreenMode = this.fullscreenMode ? this.checkIsMobile() : this.fullscreenMode
+    },
+    closeStartMenu() {
       this.desktopStartMenuActive = false;
     },
-    toggleFullscreenMoode() {
-      this.fullscreenMode = !this.fullscreenMode;
+    // showTaskBar() {
+    //   this.taskbarActive = true;
+    // },
+    // hideTaskBar() {
+    //   this.taskbarActive = false;
+    // },
+    toggleFullscreenMode(mode = undefined) {
+      if (mode === undefined) this.fullscreenMode = !this.fullscreenMode;
+      else this.fullscreenMode = mode
     },
     toggleCrtMode() {
       this.crtMode = !this.crtMode;
@@ -267,5 +295,48 @@ export default {
     justify-content: stretch;
     flex-direction: column;
   }
+
+  .shutdown-screen {
+    resize: none;
+    display: flex;
+    margin: auto;
+    align-items: center;
+    justify-content: center;
+
+    span.shutdown-message {
+      color: darkorange;
+      font-size: xx-large;
+    }
+
+    span {
+      color: #f1f1f1;
+      margin: 1%;
+    }
+  }
 }
+
+.bottom-message {
+  position: fixed;
+  position: fixed;
+  bottom: 1%;
+  left: 50%;
+  transform: translate(-50%, 0%);
+}
+
+// .shutdown-screen {
+//   border-radius: 0px;
+//   // padding: 6px 6px;
+//   resize: none;
+//   height: 100%;
+//   width: 100%;
+//   pointer-events: none;
+//   box-shadow: none;
+//   outline: none;
+//   z-index: 0;
+//   color: #f1f1f1;
+//   background-color: #111316;
+//   margin: auto;
+//   // border: 3px solid green;
+//   padding: 10px;
+// }
 </style>

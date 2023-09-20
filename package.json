@@ -6,7 +6,8 @@
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
     "watch": "vue-cli-service build --watch",
-    "lint": "vue-cli-service lint"
+    "lint": "vue-cli-service lint",
+    "updatebrowsers": "npx browserslist@latest --update-db"
   },
   "dependencies": {
     "core-js": "^3.6.5",
