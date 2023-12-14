@@ -98,6 +98,7 @@ export const fetchS3 = (server, path = '/') => {
             break;
           case 'PDF':
             icon = 'WordPad'
+            type = 'internet'
             console.log('S3 PDF-File')
             console.log(data[0])
             // data = []
