@@ -1,6 +1,6 @@
 <template>
   <div ref="desktop" class="desktop" v-on:click.left="resetDesktopContextMenu" v-on:click.right="desktopContextMenu">
-    <div ref="background" class="background" />
+    <div ref="background" class="background"></div>
     <div class="programs">
       <Window v-bind:key="program[0]" v-for="program in programsOpen" :fileName="program[0]" :fileIcon="program[1]"
         :fileType="program[2]" :files="program[4]" :minimize="program[3]" :fixedSize="program[5]"
